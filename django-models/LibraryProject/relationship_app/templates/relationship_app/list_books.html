@@ -7,6 +7,13 @@
 </head>
 <body>
     <h1>Books Available:</h1>
+
+    <!-- Logout button -->
+    <form action="{% url 'logout' %}" method="post" style="margin-bottom: 20px;">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+
     <ul>
         {% for book in books %}
         <li>{{ book.title }} by {{ book.author.name }}</li>
