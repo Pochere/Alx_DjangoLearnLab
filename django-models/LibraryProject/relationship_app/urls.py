@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from . import views   # import whole views module
+from .views import admin_view, librarian_view, member_view
 
 urlpatterns = [
     path("books/", views.list_books, name="list_books"),
@@ -12,4 +13,9 @@ urlpatterns = [
 
     # Register view must be referenced as views.register for checker
     path("register/", views.register, name="register"),
+
+    # Codes for Role-based URLs 
+    path("admin-view/", admin_view, name="admin_view"),         # Admin-only page
+    path("librarian-view/", librarian_view, name="librarian_view"),   # Librarian-only page
+    path("member-view/", member_view, name="member_view"),     # Member-only page
 ]
