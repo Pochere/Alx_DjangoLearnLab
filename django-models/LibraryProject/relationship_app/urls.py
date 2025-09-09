@@ -18,4 +18,9 @@ urlpatterns = [
     path("admin-view/", admin_view, name="admin_view"),         # Admin-only page
     path("librarian-view/", librarian_view, name="librarian_view"),   # Librarian-only page
     path("member-view/", member_view, name="member_view"),     # Member-only page
+
+    path("book/add/", views.add_book, name="add_book"),
+    path("book/<int:book_id>/edit/", views.edit_book, name="edit_book"),
+    path("book/<int:book_id>/delete/", views.delete_book, name="delete_book"),
 ]
+
