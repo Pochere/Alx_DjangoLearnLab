@@ -32,7 +32,7 @@ class CustomUser(AbstractUser):
         "auth.Permission",
         related_name="customuser_set",   # 👈 prevent clash
         blank=True,
-    )
+    ) 
 
     objects = CustomUserManager()
 
