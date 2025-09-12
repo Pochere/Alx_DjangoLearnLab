@@ -1,3 +1,24 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import permission_required
+from .models import Book
 
-# Create your views here.
+# View books (only for users with can_view permission)
+@permission_required('bookshelf.can_view', raise_exception=True)
+def list_books(request):
+    books = Book.objects.all()
+    return render(request, 'bookshelf/list_books.html', {'books': books})
+
+# Add a new book (only for users with can_create permission)
+@permission_required('bookshelf.can_create', raise_exception=True)
+def add_book(request):
+    return render(request, 'bookshelf/add_book.html')
+
+# Edit book (only for users with can_edit permission)
+@permission_required('bookshelf.can_edit', raise_exception=True)
+def edit_book(request, book_id):
+    return render(request, 'bookshelf/edit_book.html', {'book_id': book_id})
+
+# Delete book (only for users with can_delete permission)
+@permission_required('bookshelf.can_delete', raise_exception=True)
+def delete_book(request, book_id):
+    return render(request, 'bookshelf/delete_book.html', {'book_id': book_id})
