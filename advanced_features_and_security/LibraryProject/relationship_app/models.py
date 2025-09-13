@@ -1,9 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User   # ✅ NEW: import User model
-from django.db.models.signals import post_save   # ✅ NEW: for signals
-from django.dispatch import receiver  # ✅ NEW: for signals          
+from django.contrib.auth.models import User   # ✅ built-in User
+from django.db.models.signals import post_save
+from django.dispatch import receiver  
+from bookshelf.models import Book
 
-# Create your models here.
+
 class Author(models.Model):
     name = models.CharField(max_length=100)
 
@@ -11,25 +12,9 @@ class Author(models.Model):
         return self.name
 
 
-class Book(models.Model):
-    title = models.CharField(max_length=200)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
-
-        # Custom permissions for Book
-class Meta:
-    permissions = [
-        ("can_add_book", "Can add book"),
-        ("can_change_book", "Can change book"),
-        ("can_delete_book", "Can delete book"),
-        ]
-
-
 class Library(models.Model):
     name = models.CharField(max_length=100)
-    books = models.ManyToManyField(Book)
+    books = models.ManyToManyField(Book)   # ✅ use Book from bookshelf
 
     def __str__(self):
         return self.name
@@ -42,7 +27,8 @@ class Librarian(models.Model):
     def __str__(self):
         return self.name
 
-# ✅ NEW: UserProfile model for role-based access control
+
+# ✅ UserProfile model for role-based access control
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
@@ -56,7 +42,7 @@ class UserProfile(models.Model):
         return f"{self.user.username} - {self.role}"
 
 
-# ✅ NEW: Signals to auto-create and save UserProfile
+# ✅ Signals to auto-create and save UserProfile
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
