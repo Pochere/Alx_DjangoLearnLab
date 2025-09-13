@@ -1,16 +1,25 @@
+<!-- bookshelf/templates/bookshelf/book_list.html -->
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Book List</title>
 </head>
 <body>
     <h1>Book List</h1>
+
+    <form method="get" action="{% url 'book_list' %}">
+        <input type="text" name="q" placeholder="Search by title">
+        <button type="submit">Search</button>
+    </form>
+
     <ul>
-        {% for book in books %}
-            <li>{{ book.title }} by {{ book.author }}</li>
-        {% empty %}
-            <li>No books available.</li>
-        {% endfor %}
+      {% for book in books %}
+        <li>{{ book.title }} by {{ book.author }}</li>
+      {% empty %}
+        <li>No books available.</li>
+      {% endfor %}
     </ul>
 </body>
 </html>
+
