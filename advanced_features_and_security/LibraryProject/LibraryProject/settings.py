@@ -134,6 +134,9 @@ X_FRAME_OPTIONS = "DENY"
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
+# Inform Django it’s behind a proxy that handles HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Redirect all HTTP requests to HTTPS
 SECURE_SSL_REDIRECT = True
 
