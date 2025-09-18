@@ -70,3 +70,18 @@ Filters for author and publication_year were available.
 Search functionality worked for title and author.
 
 ✅ Result: The Book model is fully integrated into the Django Admin with custom list display, filtering, and search functionality.
+
+
+## Deployment Configuration for HTTPS
+
+To enable HTTPS in production:
+1. Obtain an SSL/TLS certificate (e.g., using Let's Encrypt).
+2. Update your web server configuration (Nginx/Apache) to include:
+   - The certificate file
+   - The certificate key
+3. Ensure the Django settings (`settings.py`) have:
+   - SECURE_SSL_REDIRECT = True
+   - SECURE_HSTS_SECONDS = 31536000
+   - SESSION_COOKIE_SECURE = True
+   - CSRF_COOKIE_SECURE = True
+4. Restart the web server and confirm that all HTTP requests are redirected to HTTPS.

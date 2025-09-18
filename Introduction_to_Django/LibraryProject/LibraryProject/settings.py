@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'bookshelf',
 ]
 
+AUTH_USER_MODEL = "bookshelf.CustomUser"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -121,3 +123,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = "list_books"   # after login, go to books list
+LOGOUT_REDIRECT_URL = "login"       # after logout, go back to login
+
+
+
