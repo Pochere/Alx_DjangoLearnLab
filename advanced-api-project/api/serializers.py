@@ -10,6 +10,7 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = '__all__'
+        
 # Custom validation: publication_year cannot be in the future
     def validate_publication_year(self, value):
         if value is None:
