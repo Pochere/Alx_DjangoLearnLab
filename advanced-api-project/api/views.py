@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
 #i have added new imports to filter backends and permissions
-
+from django_filters import rest_framework
 from django_filters.rest_framework import DjangoFilterBackend       # NEW
 from rest_framework.filters import SearchFilter, OrderingFilter      # NEW
 from rest_framework.permissions import IsAuthenticatedOrReadOnly     # op
