@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, filters
 #i have added new imports to filter backends and permissions
 from django_filters import rest_framework
 from django_filters.rest_framework import DjangoFilterBackend       # NEW
@@ -22,7 +22,7 @@ class BookListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
      # this enables the three capabilities
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]   # NEW
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]   # NEW
 
     #  fields allowed for exact filtering (?field=value)
     filterset_fields = ['title', 'author__name', 'publication_year']              # NEW
