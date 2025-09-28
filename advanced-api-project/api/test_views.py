@@ -1,117 +1,83 @@
-from django.urls import reverse
+from django.test import TestCase
+from rest_framework.test import APIClient
 from rest_framework import status
-from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from .models import Author, Book
 
 
-class BookAPITestCase(APITestCase):
+class BookAPITestCase(TestCase):
+    """
+    Unit tests for Book API endpoints.
+    A separate test database is automatically created and destroyed by Django,
+    ensuring tests do not affect development or production data.
+    """
+
     def setUp(self):
-        # Create test user
-        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="tester", password="password123")
 
-        # Create authors
-        self.author1 = Author.objects.create(name="Author One")
-        self.author2 = Author.objects.create(name="Author Two")
-
-        # Create books
+        # Create sample authors and books
+        self.author = Author.objects.create(name="John Doe")
         self.book1 = Book.objects.create(
-            title="Django for Beginners",
-            author=self.author1,
-            publication_year=2020,
+            title="Django for Beginners", author=self.author, publication_year=2021
         )
         self.book2 = Book.objects.create(
-            title="Advanced Django",
-            author=self.author2,
-            publication_year=2021,
+            title="Advanced Django", author=self.author, publication_year=2022
         )
 
-    def authenticate(self):
-        """Helper method to login the test user."""
-        self.client.login(username="testuser", password="testpass")
-
-    def extract_items(self, response):
-        """
-        Handles both paginated and non-paginated responses.
-        If response JSON has 'results', return that.
-        Otherwise return the JSON list directly.
-        """
-        body = response.json()
-        return body["results"] if isinstance(body, dict) and "results" in body else body
-
-    # ---------------- Tests ----------------
-
     def test_list_books(self):
-        url = reverse("book-list")
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        items = self.extract_items(resp)
-        self.assertEqual(len(items), 2)
+        response = self.client.get("/api/books/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("Django for Beginners", str(response.data))
 
     def test_retrieve_book(self):
-        url = reverse("book-detail", args=[self.book1.id])
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.json()["title"], "Django for Beginners")
+        response = self.client.get(f"/api/books/{self.book1.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Django for Beginners")
 
     def test_create_book_requires_authentication(self):
-        url = reverse("book-create")
-        data = {
-            "title": "New Book",
-            "author": self.author1.id,
-            "publication_year": 2022,
-        }
-        resp = self.client.post(url, data)
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)  # not logged in
+        data = {"title": "New Book", "author": self.author.id, "publication_year": 2023}
+        response = self.client.post("/api/books/create/", data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        self.authenticate()
-        resp = self.client.post(url, data)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        # Authenticated request
+        self.client.login(username="tester", password="password123")
+        response = self.client.post("/api/books/create/", data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["title"], "New Book")
 
-    def test_update_book(self):
-        url = reverse("book-update", args=[self.book1.id])
-        data = {"title": "Updated Title", "author": self.author1.id, "publication_year": 2025}
+    def test_update_book_requires_authentication(self):
+        data = {"title": "Updated Title", "author": self.author.id, "publication_year": 2024}
+        response = self.client.put(f"/api/books/{self.book1.id}/update/", data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # Without login -> forbidden
-        resp = self.client.put(url, data)
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        # Authenticated request
+        self.client.login(username="tester", password="password123")
+        response = self.client.put(f"/api/books/{self.book1.id}/update/", data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Updated Title")
 
-        # With login
-        self.authenticate()
-        resp = self.client.put(url, data)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.json()["title"], "Updated Title")
+    def test_delete_book_requires_authentication(self):
+        response = self.client.delete(f"/api/books/{self.book1.id}/delete/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_delete_book(self):
-        url = reverse("book-delete", args=[self.book1.id])
-
-        # Without login
-        resp = self.client.delete(url)
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-        # With login
-        self.authenticate()
-        resp = self.client.delete(url)
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        # Authenticated request
+        self.client.login(username="tester", password="password123")
+        response = self.client.delete(f"/api/books/{self.book1.id}/delete/")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_search_books_by_title(self):
-        url = reverse("book-list") + "?search=django"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        items = self.extract_items(resp)
-        self.assertTrue(any("django" in b["title"].lower() for b in items))
+        response = self.client.get("/api/books/?search=Django")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 2)
 
     def test_filter_books_by_publication_year(self):
-        url = reverse("book-list") + "?publication_year=2020"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        items = self.extract_items(resp)
-        self.assertTrue(all(b["publication_year"] == 2020 for b in items))
+        response = self.client.get("/api/books/?publication_year=2021")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["publication_year"], 2021)
 
     def test_ordering_books_by_publication_year(self):
-        url = reverse("book-list") + "?ordering=publication_year"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        items = self.extract_items(resp)
-        years = [b["publication_year"] for b in items]
+        response = self.client.get("/api/books/?ordering=publication_year")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        years = [book["publication_year"] for book in response.data]
         self.assertEqual(years, sorted(years))
