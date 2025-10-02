@@ -1,0 +1,14 @@
+{% extends "blog/base.html" %}
+{% block content %}
+  <h2>Latest Posts</h2>
+  <ul>
+    {% for post in posts %}
+      <li>
+        <strong>{{ post.title }}</strong> — by {{ post.author }} on {{ post.published_date|date:"Y-m-d H:i" }}
+        <p>{{ post.content|linebreaksbr }}</p>
+      </li>
+    {% empty %}
+      <li>No posts yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
