@@ -1,0 +1,15 @@
+<!-- profile.html -->
+<!doctype html>
+<html>
+<head><title>Your profile</title></head>
+<body>
+  <h1>Your Profile</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+  <p><a href="{% url 'post_list' %}">Back to posts</a></p>
+  <p><a href="{% url 'logout' %}">Logout</a></p>
+</body>
+</html>
