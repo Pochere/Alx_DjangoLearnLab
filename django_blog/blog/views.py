@@ -4,18 +4,14 @@ from django.urls import reverse_lazy
 from .models import Post
 from .forms import PostForm
 from .forms import CustomUserCreationForm
+from .forms import ProfileForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .models import Post
+
 
 
 # View to list all posts
-# post_list views
-def post_list(request):
-    posts = Post.objects.all().order_by('-published_date')
-    return render(request, 'blog/post_list.html', {'posts': posts})
-
 # Registration view
 def register(request):
     if request.method == "POST":
