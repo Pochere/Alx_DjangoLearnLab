@@ -1,10 +1,21 @@
 {% extends "blog/base.html" %}
+
 {% block content %}
   <h2>Latest Posts</h2>
+
+  {# ✅ New: Show "Create New Post" button for logged-in users #}
+  {% if user.is_authenticated %}
+    <p><a href="{% url 'post_create' %}">+ Create New Post</a></p>
+  {% endif %}
+
   <ul>
     {% for post in posts %}
       <li>
-        <strong>{{ post.title }}</strong> — by {{ post.author }} on {{ post.published_date|date:"Y-m-d H:i" }}
+        {# ✅ New: Make title clickable to open post detail page #}
+        <strong>
+          <a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a>
+        </strong> 
+        — by {{ post.author }} on {{ post.published_date|date:"Y-m-d H:i" }}
         <p>{{ post.content|linebreaksbr }}</p>
       </li>
     {% empty %}
@@ -12,3 +23,4 @@
     {% endfor %}
   </ul>
 {% endblock %}
+
