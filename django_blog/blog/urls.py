@@ -24,4 +24,8 @@ urlpatterns = [
     # Registration and profile
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
+
+    path('post/<int:pk>/comments/new/', views.add_comment, name='add_comment'),
+    path('comment/<int:pk>/update/', views.update_comment, name='update_comment'),
+    path('comment/<int:pk>/delete/', views.delete_comment, name='delete_comment'),
 ]
