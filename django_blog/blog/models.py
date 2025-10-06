@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from taggit.managers import TaggableManager
 
 # Use the active user model from settings
 User = settings.AUTH_USER_MODEL
@@ -29,7 +30,7 @@ class Post(models.Model):
         on_delete=models.CASCADE,
         related_name='posts'
     )
-    tags = models.ManyToManyField(Tag, blank=True, related_name='posts')
+    tags = TaggableManager(blank=True)
 
     def __str__(self):
         return self.title

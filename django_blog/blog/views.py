@@ -7,6 +7,7 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
+from taggit.models import Tag
 
 
 # ---------------------------
