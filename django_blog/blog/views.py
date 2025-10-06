@@ -1,44 +1,42 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from .models import Post
-from .forms import PostForm
-from .forms import CustomUserCreationForm
-from .forms import ProfileForm
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
+from .forms import PostForm, CustomUserCreationForm, ProfileForm
 
+# function-based list view (keeps your existing homepage)
+def post_list(request):
+    posts = Post.objects.all().order_by('-published_date')
+    return render(request, 'blog/post_list.html', {'posts': posts})
 
-
-# View to list all posts
-# Registration view
+# Registration view (your existing)
 def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Optional: log the user in after registration
             login(request, user)
             return redirect('post_list')
     else:
         form = CustomUserCreationForm()
     return render(request, 'blog/register.html', {'form': form})
 
-# Profile view (authenticated users only)
 @login_required
 def profile(request):
     if request.method == "POST":
         form = ProfileForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('profile')  # refresh page after saving
+            return redirect('profile')
     else:
         form = ProfileForm(instance=request.user)
     return render(request, 'blog/profile.html', {'form': form})
 
-# 📝 Blog Post CRUD Views
 
+# Class-based CRUD views (protected correctly)
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
@@ -58,6 +56,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('post_list')
 
     def form_valid(self, form):
+        # set the logged-in user as author
         form.instance.author = self.request.user
         return super().form_valid(form)
 
