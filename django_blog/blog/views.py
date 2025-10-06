@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from .models import Post
+from .models import Comment
 from .forms import PostForm, CustomUserCreationForm, ProfileForm
+from .forms import CommentForm
+
 
 # function-based list view (keeps your existing homepage)
 def post_list(request):
@@ -84,3 +88,47 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+    
+
+# create a comment for a post (post_pk passed from URL)
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # load the parent Post for use in form_valid and success URL
+        self.post = get_object_or_404(Post, pk=kwargs['post_pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = self.post
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('post_detail', kwargs={'pk': self.post.pk})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def get_success_url(self):
+        return reverse('post_detail', kwargs={'pk': self.get_object().post.pk})
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'blog/comment_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('post_detail', kwargs={'pk': self.get_object().post.pk})
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+    

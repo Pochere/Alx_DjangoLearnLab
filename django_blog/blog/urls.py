@@ -6,6 +6,10 @@ urlpatterns = [
     # Home / posts list (both root and explicit posts/)
     path('', views.post_list, name='post_list'),
     path('posts/', views.post_list, name='post_list'),
+    path('post/<int:post_pk>/comments/new/', views.CommentCreateView.as_view(), name='comment_create'),
+    path('post/<int:post_pk>/comments/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment_update'),
+    path('post/<int:post_pk>/comments/<int:pk>/delete/', views.CommentDeleteView.as_view(), name='comment_delete'),
+
 
     # CRUD using singular "post/" paths (checker expects these substrings)
     path('post/new/', views.PostCreateView.as_view(), name='post_create'),
