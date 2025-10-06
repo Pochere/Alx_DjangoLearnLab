@@ -1,6 +1,14 @@
+
+
 {% extends "blog/base.html" %}
 
 {% block content %}
+
+<form method="get" action="{% url 'search_posts' %}">
+  <input type="text" name="q" placeholder="Search posts..." value="{{ request.GET.q }}">
+  <button type="submit">Search</button>
+</form>
+<hr>
   <h2>Latest Posts</h2>
 
   {# ✅ New: Show "Create New Post" button for logged-in users #}

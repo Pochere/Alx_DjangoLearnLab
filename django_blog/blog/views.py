@@ -1,46 +1,56 @@
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse, reverse_lazy
-from .models import Post
-from .models import Comment
-from .forms import PostForm, CustomUserCreationForm, ProfileForm
-from .forms import CommentForm
+from django.contrib.auth.forms import UserCreationForm
+from .models import Post, Comment
+from .forms import PostForm, CommentForm
 
 
-# function-based list view (keeps your existing homepage)
+# ---------------------------
+# POST LIST (Homepage)
+# ---------------------------
 def post_list(request):
     posts = Post.objects.all().order_by('-published_date')
     return render(request, 'blog/post_list.html', {'posts': posts})
 
-# Registration view (your existing)
+
+# ---------------------------
+# USER REGISTRATION
+# ---------------------------
 def register(request):
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('post_list')
     else:
-        form = CustomUserCreationForm()
+        form = UserCreationForm()
     return render(request, 'blog/register.html', {'form': form})
 
-@login_required
-def profile(request):
-    if request.method == "POST":
-        form = ProfileForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect('profile')
-    else:
-        form = ProfileForm(instance=request.user)
-    return render(request, 'blog/profile.html', {'form': form})
+
+# ---------------------------
+# PROFILE (Optional / Not in scope)
+# ---------------------------
+# Commented out for now since no ProfileForm exists
+# @login_required
+# def profile(request):
+#     if request.method == "POST":
+#         form = ProfileForm(request.POST, instance=request.user)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('profile')
+#     else:
+#         form = ProfileForm(instance=request.user)
+#     return render(request, 'blog/profile.html', {'form': form})
 
 
-# Class-based CRUD views (protected correctly)
+# ---------------------------
+# CLASS-BASED POST CRUD
+# ---------------------------
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
@@ -60,7 +70,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('post_list')
 
     def form_valid(self, form):
-        # set the logged-in user as author
         form.instance.author = self.request.user
         return super().form_valid(form)
 
@@ -88,16 +97,17 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
-    
 
-# create a comment for a post (post_pk passed from URL)
+
+# ---------------------------
+# COMMENT CRUD (Class-based)
+# ---------------------------
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment_form.html'
 
     def dispatch(self, request, *args, **kwargs):
-        # load the parent Post for use in form_valid and success URL
         self.post = get_object_or_404(Post, pk=kwargs['post_pk'])
         return super().dispatch(request, *args, **kwargs)
 
@@ -131,4 +141,33 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user == self.get_object().author
-    
+
+
+# ---------------------------
+# ADD COMMENT (Function-based)
+# ---------------------------
+@login_required
+def add_comment(request, pk):
+    """
+    Allow a logged-in user to add a comment to a specific post.
+    """
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            Comment.objects.create(post=post, author=request.user, content=content)
+            return redirect('post_detail', pk=pk)
+    return render(request, 'blog/comment_form.html', {'post': post})
+
+from django.db.models import Q  # <-- make sure this import is near the top
+
+def search_posts(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    return render(request, 'blog/search_results.html', {'query': query, 'results': results})

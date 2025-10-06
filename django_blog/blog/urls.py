@@ -5,13 +5,16 @@ from . import views
 urlpatterns = [
     # Home / posts list (both root and explicit posts/)
     path('', views.post_list, name='post_list'),
+    path('search/', views.search_posts, name='search_posts'),
+
     path('posts/', views.post_list, name='post_list'),
+
+    # Comment URLs (class-based)
     path('post/<int:post_pk>/comments/new/', views.CommentCreateView.as_view(), name='comment_create'),
     path('post/<int:post_pk>/comments/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment_update'),
     path('post/<int:post_pk>/comments/<int:pk>/delete/', views.CommentDeleteView.as_view(), name='comment_delete'),
 
-
-    # CRUD using singular "post/" paths (checker expects these substrings)
+    # Post CRUD URLs
     path('post/new/', views.PostCreateView.as_view(), name='post_create'),
     path('post/<int:pk>/', views.PostDetailView.as_view(), name='post_detail'),
     path('post/<int:pk>/update/', views.PostUpdateView.as_view(), name='post_update'),
@@ -23,9 +26,5 @@ urlpatterns = [
 
     # Registration and profile
     path('register/', views.register, name='register'),
-    path('profile/', views.profile, name='profile'),
-
-    path('post/<int:pk>/comments/new/', views.add_comment, name='add_comment'),
-    path('comment/<int:pk>/update/', views.update_comment, name='update_comment'),
-    path('comment/<int:pk>/delete/', views.delete_comment, name='delete_comment'),
+    #path('profile/', views.profile, name='profile'),
 ]

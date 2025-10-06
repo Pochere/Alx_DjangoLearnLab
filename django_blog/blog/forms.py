@@ -1,36 +1,22 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Post
-from .models import Comment
+from .models import Post, Comment, Tag
 
 
-class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
-
-# this connects directly to post model
 class PostForm(forms.ModelForm):
+    """
+    Form for creating and editing blog posts, including tags.
+    """
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'tags']  # include tags in the form
 
-class ProfileForm(forms.ModelForm):
-    """Form for editing user profile information."""
-    class Meta:
-        model = User
-        fields = ['username', 'email']        
 
 class CommentForm(forms.ModelForm):
+    """
+    Form for creating and editing comments on posts.
+    """
     class Meta:
         model = Comment
         fields = ['content']
-        widgets = {
-            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write a comment...'})
-        }
-        labels = {
-            'content': ''
-        }
