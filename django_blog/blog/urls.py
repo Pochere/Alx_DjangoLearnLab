@@ -5,9 +5,8 @@ from . import views
 urlpatterns = [
     # Home / posts list (both root and explicit posts/)
     path('', views.post_list, name='post_list'),
-    path('search/', views.search_posts, name='search_posts'),
-
     path('posts/', views.post_list, name='post_list'),
+     path('search/', views.search_posts, name='search_posts'),
 
     # Comment URLs (class-based)
     path('post/<int:post_pk>/comments/new/', views.CommentCreateView.as_view(), name='comment_create'),

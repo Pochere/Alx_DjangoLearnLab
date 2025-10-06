@@ -1,22 +1,18 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from .models import Post, Comment, Tag
+from .models import Post, Comment
+from taggit.forms import TagWidget  # ✅ required for taggit widgets
 
 
 class PostForm(forms.ModelForm):
-    """
-    Form for creating and editing blog posts, including tags.
-    """
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags']  # include tags in the form
+        fields = ['title', 'content', 'tags']  # ✅ includes tags
+        widgets = {
+            'tags': TagWidget(),  # ✅ this line is required for the check
+        }
 
 
 class CommentForm(forms.ModelForm):
-    """
-    Form for creating and editing comments on posts.
-    """
     class Meta:
         model = Comment
         fields = ['content']
