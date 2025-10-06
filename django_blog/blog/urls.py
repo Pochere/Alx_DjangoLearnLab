@@ -6,8 +6,9 @@ urlpatterns = [
     # Home / posts list (both root and explicit posts/)
     path('', views.post_list, name='post_list'),
     path('posts/', views.post_list, name='post_list'),
-     path('search/', views.search_posts, name='search_posts'),
-
+    path('search/', views.search_posts, name='search_posts'),
+    path('tags/<slug:tag_slug>/', views.PostByTagListView.as_view(), name='posts_by_tag'),
+   
     # Comment URLs (class-based)
     path('post/<int:post_pk>/comments/new/', views.CommentCreateView.as_view(), name='comment_create'),
     path('post/<int:post_pk>/comments/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment_update'),
