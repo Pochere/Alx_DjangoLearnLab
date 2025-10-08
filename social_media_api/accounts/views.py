@@ -24,3 +24,15 @@ class LoginView(generics.GenericAPIView):
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
         return Response({"token": token.key}, status=status.HTTP_200_OK)
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            'username': user.username,
+            'email': user.email,
+            'bio': user.bio,
+            'profile_picture': user.profile_picture.url if user.profile_picture else None
+        })    
