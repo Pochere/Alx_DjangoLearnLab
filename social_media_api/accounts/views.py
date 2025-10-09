@@ -2,12 +2,9 @@ from .models import CustomUser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import generics, permissions, status
+from rest_framework import status
 from django.contrib.auth import get_user_model
 
-
-
-User = get_user_model()
 
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -15,7 +12,7 @@ class FollowUserView(APIView):
     def post(self, request, user_id):
         try:
             target_user = CustomUser.objects.get(id=user_id)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
         if target_user == request.user:
