@@ -1,3 +1,4 @@
+from .models import CustomUser
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,7 +15,7 @@ class FollowUserView(APIView):
 
     def post(self, request, user_id):
         try:
-            target_user = User.objects.get(id=user_id)
+            target_user = CustomUser.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -30,7 +31,7 @@ class UnfollowUserView(APIView):
 
     def post(self, request, user_id):
         try:
-            target_user = User.objects.get(id=user_id)
+            target_user = CustomUser.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
