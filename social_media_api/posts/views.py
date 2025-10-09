@@ -13,9 +13,9 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]  # enables searching
     search_fields = ['title', 'content']      # searchable fields
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-created_at')
@@ -29,7 +29,10 @@ class FeedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Gets all users that the current user follows
+        """
+        Returns all posts from users the current user follows,
+        ordered by creation date (most recent first)
+        """
         user = request.user
         following_users = user.following.all()  # Gets all users this person follows
         posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
