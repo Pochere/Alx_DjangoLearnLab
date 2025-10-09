@@ -1,21 +1,20 @@
+from .models import CustomUser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status
 from django.contrib.auth import get_user_model
 
-from .serializers import RegisterSerializer, LoginSerializer
+
 
 User = get_user_model()
 
-User = get_user_model()
-
-class FollowUserView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+class FollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
         try:
-            target_user = User.objects.get(id=user_id)  # This uses get_user_model()
+            target_user = CustomUser.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -25,13 +24,12 @@ class FollowUserView(generics.GenericAPIView):
         request.user.following.add(target_user)
         return Response({"message": f"You are now following {target_user.username}."}, status=status.HTTP_200_OK)
 
-
-class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+class UnfollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
         try:
-            target_user = User.objects.get(id=user_id)
+            target_user = CustomUser.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
